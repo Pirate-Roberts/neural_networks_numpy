@@ -53,5 +53,14 @@ class Perceptron():
             training_loss.append(self.loss)
 
         return training_loss
+    
+    def predict(self, X):
+        """
+        
+        """
+        self.model(X)
+        pred_prob = self.A
+        pred = pred_prob >= 0.5
+        return pred_prob, pred
 
 
