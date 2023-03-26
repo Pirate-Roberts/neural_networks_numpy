@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.metrics import log_loss as log_loss_sklearn
 
 class Perceptron():
     """
@@ -20,11 +21,17 @@ class Perceptron():
         self.Z = np.dot(X, self.W) + self.B
         self.A = 1 / (1 + np.exp(-self.Z))
 
-    def Log_Loss(self, y):
+    def Log_Loss(self, y, eps=1e-15, loglosssklearn=True):
         """
         Perceptron's cost function.
         """
-        self.loss = -1/len(y) * np.sum(y * np.log(self.A) + (1-y) * np.log(1-self.A))
+        if loglosssklearn:
+            self.loss = log_loss_sklearn(y, self.A)
+        else:
+            self.loss = (
+                -1/len(y) * np.sum(
+                    y * np.log(self.A+eps) + 
+                    (1-y) * np.log(1-self.A+eps)))
     
     def gradients(self, X, y):
         """
@@ -40,20 +47,20 @@ class Perceptron():
         self.W = self.W - lr * self.dW
         self.B = self.B - lr * self.dB
         
-    def fit(self, X, y, lr, cycle_nb):
+    def fit(self, X, y, lr, cycle_nb, eps=1e-15, loglosssklearn=True):
         """
         Training function
         """
         training_loss = []
         for i in range(cycle_nb):
             self.model(X)
-            self.Log_Loss(y)
+            self.Log_Loss(y, eps, loglosssklearn)
             self.gradients(X, y)
             self.update(lr)
             training_loss.append(self.loss)
 
         return training_loss
-    
+
     def predict(self, X):
         """
         
@@ -61,6 +68,5 @@ class Perceptron():
         self.model(X)
         pred_prob = self.A
         pred = pred_prob >= 0.5
+        
         return pred_prob, pred
-
-
